@@ -17,7 +17,9 @@
       margin-top: 20px;
     }
     svg {
-      height: 90vh;
+      width: 100%;
+      max-width: 500px;
+      height: auto;
     }
     .primary {
       fill: #f44336 !important;
@@ -30,25 +32,23 @@
 <body>
   <h1>🔥 Активные мышцы</h1>
 
-  <!-- Подключаем SVG -->
-  <div id="muscle-map">
-    <!-- Сюда будет вставлен твой SVG -->
-  </div>
+  <!-- Новый SVG будет загружен сюда -->
+  <div id="muscle-map"></div>
 
   <script>
-    // Данные из muscles.json
+    // Названия активных мышц (должны совпадать с ID в SVG)
     const muscles = {
       primary: ["biceps_left", "biceps_right"],
       secondary: []
     };
 
-    // Загружаем SVG (тот, что ты экспортировал)
+    // Загружаем SVG с человеком
     fetch("Group.svg")
       .then(res => res.text())
       .then(svgText => {
         document.getElementById("muscle-map").innerHTML = svgText;
 
-        // Подсветка мышц
+        // Подсветка по ID
         muscles.primary.forEach(id => {
           const el = document.getElementById(id);
           if (el) el.classList.add("primary");
