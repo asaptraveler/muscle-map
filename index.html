@@ -1,27 +1,26 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>🔥 Активные мышцы</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Muscle Map</title>
   <style>
     body {
-      background-color: #111;
+      background: #111;
       color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       font-family: sans-serif;
-      text-align: center;
-      padding: 20px;
+    }
+    h1 {
+      margin-top: 20px;
     }
     svg {
-      width: 300px;
-      margin: 40px auto;
-      display: block;
-    }
-    .muscle {
-      fill: #333;
-      transition: fill 0.3s ease;
+      height: 90vh;
     }
     .primary {
-      fill: red !important;
+      fill: #f44336 !important;
     }
     .secondary {
       fill: orange !important;
@@ -29,31 +28,32 @@
   </style>
 </head>
 <body>
-  <h2>🔥 Активные мышцы</h2>
+  <h1>🔥 Активные мышцы</h1>
 
-  <svg viewBox="0 0 200 500" xmlns="http://www.w3.org/2000/svg">
-    <rect id="pectoralis_major" class="muscle" x="70" y="50" width="60" height="20"/>
-    <rect id="latissimus_dorsi" class="muscle" x="60" y="100" width="80" height="20"/>
-    <rect id="quadriceps" class="muscle" x="70" y="180" width="60" height="20"/>
-    <rect id="biceps" class="muscle" x="40" y="50" width="20" height="20"/>
-    <rect id="triceps" class="muscle" x="140" y="50" width="20" height="20"/>
-    <rect id="hamstrings" class="muscle" x="70" y="220" width="60" height="20"/>
-    <rect id="erector_spinae" class="muscle" x="70" y="260" width="60" height="20"/>
-  </svg>
+  <!-- Подключаем SVG -->
+  <div id="muscle-map">
+    <!-- Сюда будет вставлен твой SVG -->
+  </div>
 
   <script>
-    fetch("muscles.json")
-      .then(response => response.json())
-      .then(data => {
-        const primary = data.primary || [];
-        const secondary = data.secondary || [];
+    // Данные из muscles.json
+    const muscles = {
+      primary: ["biceps_left", "biceps_right"],
+      secondary: []
+    };
 
-        primary.forEach(id => {
+    // Загружаем SVG (тот, что ты экспортировал)
+    fetch("Group.svg")
+      .then(res => res.text())
+      .then(svgText => {
+        document.getElementById("muscle-map").innerHTML = svgText;
+
+        // Подсветка мышц
+        muscles.primary.forEach(id => {
           const el = document.getElementById(id);
           if (el) el.classList.add("primary");
         });
-
-        secondary.forEach(id => {
+        muscles.secondary.forEach(id => {
           const el = document.getElementById(id);
           if (el) el.classList.add("secondary");
         });
