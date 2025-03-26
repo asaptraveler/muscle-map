@@ -1,4 +1,4 @@
 {
-  "primary": [],
-  "secondary": []
+  "primary": ["pectoralis_major", "latissimus_dorsi", "quadriceps"],
+  "secondary": ["triceps", "biceps"]
 }
