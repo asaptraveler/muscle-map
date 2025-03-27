@@ -1,76 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Muscle Map</title>
-  <style>
-    body {
-      background: #fff;
-      color: black;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      font-family: sans-serif;
-    }
-
-    h1 {
-      margin-top: 20px;
-    }
-
-    svg {
-      width: 100%;
-      max-width: 500px;
-      height: auto;
-    }
-
-    .primary path {
-      fill: #f44336 !important;
-      transition: fill 0.3s ease;
-    }
-
-    .secondary path {
-      fill: orange !important;
-      transition: fill 0.3s ease;
-    }
-
-    #muscle-map g:hover path {
-      fill: #2196f3 !important;
-      cursor: pointer;
-    }
-
-    #tooltip {
-      position: absolute;
-      background: black;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      display: none;
-      pointer-events: none;
-      z-index: 1000;
-    }
-  </style>
-</head>
-<body>
-  <h1>🔥 Активные мышцы</h1>
-
-  <!-- Контейнер для SVG -->
-  <div id="muscle-map"></div>
-
-  <!-- Tooltip -->
-  <div id="tooltip"></div>
-
-  <script>
-    const muscles = {
+<script>
+  // Связываем названия файлов с активными мышцами
+  const musclesByFile = {
+    "Biceps brachii.svg": {
       primary: ["biceps_left", "biceps_right"],
-      secondary: ["abdominals"]
-    };
+      secondary: []
+    },
+    "Adductor Longus and Pectineus.svg": {
+      primary: ["adductor_longus", "pectineus"],
+      secondary: []
+    }
+  };
 
-    fetch("Group.svg")
+  const svgSelector = document.createElement("select");
+  svgSelector.id = "svg-selector";
+
+  Object.keys(musclesByFile).forEach(file => {
+    const option = document.createElement("option");
+    option.value = file;
+    option.textContent = file.replace(".svg", "");
+    svgSelector.appendChild(option);
+  });
+
+  document.body.insertBefore(svgSelector, document.getElementById("muscle-map"));
+
+  const tooltip = document.getElementById("tooltip");
+  const muscleMap = document.getElementById("muscle-map");
+
+  function loadSVG(fileName) {
+    fetch(fileName)
       .then(res => res.text())
       .then(svgText => {
-        document.getElementById("muscle-map").innerHTML = svgText;
+        muscleMap.innerHTML = svgText;
+
+        const muscles = musclesByFile[fileName];
+        document.querySelectorAll(".primary, .secondary").forEach(el => {
+          el.classList.remove("primary", "secondary");
+        });
 
         muscles.primary.forEach(id => {
           const el = document.getElementById(id);
@@ -80,8 +45,6 @@
           const el = document.getElementById(id);
           if (el) el.classList.add("secondary");
         });
-
-        const tooltip = document.getElementById("tooltip");
 
         document.querySelectorAll("#muscle-map g").forEach(g => {
           g.addEventListener("mouseenter", () => {
@@ -100,6 +63,11 @@
           });
         });
       });
-  </script>
-</body>
-</html>
+  }
+
+  svgSelector.addEventListener("change", (e) => {
+    loadSVG(e.target.value);
+  });
+
+  loadSVG(svgSelector.value); // Загрузить SVG по умолчанию
+</script>
