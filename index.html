@@ -41,11 +41,11 @@
   <div id="tooltip"></div>
 
   <script>
-    // Получаем активные мышцы с Node.js сервера
-    fetch("https://muscle-map-tau.vercel.app/api/muscles")
+    // Получаем активные мышцы с API Vercel (Notion → muscles.js)
+    fetch("/api/muscles")
       .then(res => res.json())
       .then(activeMuscles => {
-        // Загружаем SVG
+        // Загружаем SVG карту
         fetch("muscle-map.svg")
           .then(res => res.text())
           .then(svg => {
@@ -78,6 +78,9 @@
               });
             });
           });
+      })
+      .catch(err => {
+        console.error("Ошибка получения мышц:", err);
       });
   </script>
 </body>
