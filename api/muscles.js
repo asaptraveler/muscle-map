@@ -20,17 +20,26 @@ export default async function handler(req, res) {
 
   const data = await response.json();
 
-  const allMuscles = new Set();
+  const primary = [];
+  const secondary = [];
 
   data.results.forEach(page => {
-    const muscleProp = page.properties["Muscles"];
-    if (muscleProp?.multi_select) {
-      muscleProp.multi_select.forEach(tag => allMuscles.add(tag.name));
+    const muscleProp = page.properties["Мышца"];
+    const activeProp = page.properties["Активна"];
+    const typeProp = page.properties["Тип"];
+
+    const muscleName = muscleProp?.title?.[0]?.text?.content;
+    const isActive = activeProp?.checkbox;
+    const type = typeProp?.select?.name;
+
+    if (isActive && muscleName && type) {
+      if (type === "primary") {
+        primary.push(muscleName);
+      } else if (type === "secondary") {
+        secondary.push(muscleName);
+      }
     }
   });
 
-  res.status(200).json({
-    primary: [...allMuscles],
-    secondary: []
-  });
+  res.status(200).json({ primary, secondary });
 }
