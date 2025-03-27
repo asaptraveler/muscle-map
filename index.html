@@ -42,7 +42,7 @@
 
   <script>
     // Получаем активные мышцы с Node.js сервера
-    fetch("http://localhost:3000/muscles")
+    fetch("https://muscle-map-tau.vercel.app/api/muscles")
       .then(res => res.json())
       .then(activeMuscles => {
         // Загружаем SVG
