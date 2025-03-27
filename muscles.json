@@ -1,4 +1,16 @@
 {
-  "primary": ["pectoralis_major", "latissimus_dorsi", "quadriceps"],
-  "secondary": ["biceps", "triceps"]
+  "primary": [
+    "triceps_lateral_head",
+    "pecs",
+    "deltoids_front",
+    "biceps_brachii",
+    "triceps_long_head"
+  ],
+  "secondary": [
+    "front_traps",
+    "scm",
+    "sternocleids",
+    "biceps_brachialis",
+    "obliques_external"
+  ]
 }
