@@ -4,45 +4,20 @@
   <meta charset="UTF-8" />
   <title>Карта мышц</title>
   <style>
-    body {
-      background: #fff;
-      font-family: sans-serif;
-      text-align: center;
-    }
+   /* Скрыть только мышцы, но не весь скелет */
+  .muscle {
+    display: none;
+  }
 
-    svg {
-      width: 100%;
-      max-width: 800px;
-      height: auto;
-    }
+  .primary {
+    display: inline !important;
+  }
 
-    #muscle-map svg g {
-      display: none; /* Все мышцы скрыты по умолчанию */
-    }
-
-    .primary {
-      display: inline !important;
-      fill: #f44336 !important;
-    }
-
-    .secondary {
-      display: inline !important;
-      fill: orange !important;
-      opacity: 0.6;
-    }
-
-    #tooltip {
-      position: absolute;
-      display: none;
-      background: black;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      pointer-events: none;
-      z-index: 1000;
-    }
-  </style>
+  .secondary {
+    display: inline !important;
+    opacity: 0.6;
+  }
+</style>
 </head>
 <body>
   <h1>🔥 Активные мышцы</h1>
