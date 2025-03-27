@@ -1,73 +1,82 @@
-<script>
-  // Связываем названия файлов с активными мышцами
-  const musclesByFile = {
-    "Biceps brachii.svg": {
-      primary: ["biceps_left", "biceps_right"],
-      secondary: []
-    },
-    "Adductor Longus and Pectineus.svg": {
-      primary: ["adductor_longus", "pectineus"],
-      secondary: []
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Карта мышц</title>
+  <style>
+    body {
+      background: #fff;
+      font-family: sans-serif;
+      text-align: center;
     }
-  };
+    svg {
+      width: 100%;
+      max-width: 800px;
+      height: auto;
+    }
+    .primary path, .primary {
+      fill: #f44336 !important;
+      transition: fill 0.3s ease;
+    }
+    .secondary path, .secondary {
+      fill: orange !important;
+      transition: fill 0.3s ease;
+    }
+    #tooltip {
+      position: absolute;
+      display: none;
+      background: black;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔥 Активные мышцы</h1>
+  <div id="muscle-map"></div>
+  <div id="tooltip"></div>
 
-  const svgSelector = document.createElement("select");
-  svgSelector.id = "svg-selector";
+  <script>
+    const activeMuscles = {
+      primary: ["biceps_left", "pectoralis_major_right"],
+      secondary: ["abdominals"]
+    };
 
-  Object.keys(musclesByFile).forEach(file => {
-    const option = document.createElement("option");
-    option.value = file;
-    option.textContent = file.replace(".svg", "");
-    svgSelector.appendChild(option);
-  });
-
-  document.body.insertBefore(svgSelector, document.getElementById("muscle-map"));
-
-  const tooltip = document.getElementById("tooltip");
-  const muscleMap = document.getElementById("muscle-map");
-
-  function loadSVG(fileName) {
-    fetch(fileName)
+    fetch("muscle-map.svg")
       .then(res => res.text())
-      .then(svgText => {
-        muscleMap.innerHTML = svgText;
+      .then(svg => {
+        document.getElementById("muscle-map").innerHTML = svg;
 
-        const muscles = musclesByFile[fileName];
-        document.querySelectorAll(".primary, .secondary").forEach(el => {
-          el.classList.remove("primary", "secondary");
-        });
-
-        muscles.primary.forEach(id => {
+        // Подсвечиваем мышцы
+        activeMuscles.primary.forEach(id => {
           const el = document.getElementById(id);
           if (el) el.classList.add("primary");
         });
-        muscles.secondary.forEach(id => {
+        activeMuscles.secondary.forEach(id => {
           const el = document.getElementById(id);
           if (el) el.classList.add("secondary");
         });
 
-        document.querySelectorAll("#muscle-map g").forEach(g => {
+        // Tooltip
+        const tooltip = document.getElementById("tooltip");
+        document.querySelectorAll("#muscle-map svg g").forEach(g => {
           g.addEventListener("mouseenter", () => {
-            const name = g.getAttribute("id") || "Unknown";
+            const name = g.id || "неизвестно";
             tooltip.innerText = name;
             tooltip.style.display = "block";
           });
-
+          g.addEventListener("mousemove", (e) => {
+            tooltip.style.top = e.pageY + 10 + "px";
+            tooltip.style.left = e.pageX + 10 + "px";
+          });
           g.addEventListener("mouseleave", () => {
             tooltip.style.display = "none";
           });
-
-          g.addEventListener("mousemove", (e) => {
-            tooltip.style.top = `${e.pageY + 10}px`;
-            tooltip.style.left = `${e.pageX + 10}px`;
-          });
         });
       });
-  }
-
-  svgSelector.addEventListener("change", (e) => {
-    loadSVG(e.target.value);
-  });
-
-  loadSVG(svgSelector.value); // Загрузить SVG по умолчанию
-</script>
+  </script>
+</body>
+</html>
