@@ -5,9 +5,9 @@
   <title>Карта мышц</title>
   <style>
     body {
+      background: #fff;
       font-family: sans-serif;
       text-align: center;
-      background: white;
     }
 
     svg {
@@ -16,14 +16,19 @@
       height: auto;
     }
 
+    #muscle-map svg g {
+      display: none; /* Все мышцы скрыты по умолчанию */
+    }
+
     .primary {
+      display: inline !important;
       fill: #f44336 !important;
-      transition: fill 0.3s ease;
     }
 
     .secondary {
+      display: inline !important;
       fill: orange !important;
-      transition: fill 0.3s ease;
+      opacity: 0.6;
     }
 
     #tooltip {
@@ -35,6 +40,7 @@
       border-radius: 4px;
       font-size: 12px;
       pointer-events: none;
+      z-index: 1000;
     }
   </style>
 </head>
@@ -52,24 +58,18 @@
           .then(svg => {
             document.getElementById("muscle-map").innerHTML = svg;
 
-            // Включаем только активные мышцы
+            // Включаем активные мышцы
             activeMuscles.primary.forEach(id => {
               const el = document.getElementById(id);
-              if (el) {
-                el.style.display = "inline";
-                el.classList.add("primary");
-              }
+              if (el) el.classList.add("primary");
             });
 
             activeMuscles.secondary.forEach(id => {
               const el = document.getElementById(id);
-              if (el) {
-                el.style.display = "inline";
-                el.classList.add("secondary");
-              }
+              if (el) el.classList.add("secondary");
             });
 
-            // Tooltip
+            // Tooltip по наведению
             const tooltip = document.getElementById("tooltip");
             document.querySelectorAll("#muscle-map svg g").forEach(g => {
               g.addEventListener("mouseenter", () => {
