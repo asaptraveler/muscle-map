@@ -31,6 +31,7 @@
       border-radius: 4px;
       font-size: 12px;
       pointer-events: none;
+      z-index: 1000;
     }
   </style>
 </head>
@@ -40,37 +41,38 @@
   <div id="tooltip"></div>
 
   <script>
+    // ✅ Укажи тут активные мышцы (id из SVG)
     const activeMuscles = {
-      primary: ["biceps_left", "pectoralis_major_right"],
-      secondary: ["abdominals"]
+      primary: ["biceps_brachii", "pectoralis_major", "triceps_lateral"],
+      secondary: ["obliques", "soleus"]
     };
 
-    fetch("muscle-map.svg")
+    fetch("muscle-map.svg") // или "Full_body_muscles.svg", если не переименовал
       .then(res => res.text())
       .then(svg => {
         document.getElementById("muscle-map").innerHTML = svg;
 
-        // Подсвечиваем мышцы
-        activeMuscles.primary.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.classList.add("primary");
-        });
-        activeMuscles.secondary.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.classList.add("secondary");
-        });
+        // Подсветка
+        const setClass = (ids, className) => {
+          ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add(className);
+          });
+        };
+
+        setClass(activeMuscles.primary, "primary");
+        setClass(activeMuscles.secondary, "secondary");
 
         // Tooltip
         const tooltip = document.getElementById("tooltip");
         document.querySelectorAll("#muscle-map svg g").forEach(g => {
           g.addEventListener("mouseenter", () => {
-            const name = g.id || "неизвестно";
-            tooltip.innerText = name;
+            tooltip.innerText = g.id || "неизвестно";
             tooltip.style.display = "block";
           });
           g.addEventListener("mousemove", (e) => {
-            tooltip.style.top = e.pageY + 10 + "px";
-            tooltip.style.left = e.pageX + 10 + "px";
+            tooltip.style.top = `${e.pageY + 10}px`;
+            tooltip.style.left = `${e.pageX + 10}px`;
           });
           g.addEventListener("mouseleave", () => {
             tooltip.style.display = "none";
