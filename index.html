@@ -41,17 +41,17 @@
   <div id="tooltip"></div>
 
   <script>
-    // Получаем активные мышцы с API Vercel (Notion → muscles.js)
+    // 1. Получаем данные с серверной функции Vercel
     fetch("/api/muscles")
       .then(res => res.json())
       .then(activeMuscles => {
-        // Загружаем SVG карту
+        // 2. Загружаем SVG
         fetch("muscle-map.svg")
           .then(res => res.text())
           .then(svg => {
             document.getElementById("muscle-map").innerHTML = svg;
 
-            // Подсветка мышц
+            // 3. Подсветка
             activeMuscles.primary.forEach(id => {
               const el = document.getElementById(id);
               if (el) el.classList.add("primary");
@@ -61,7 +61,7 @@
               if (el) el.classList.add("secondary");
             });
 
-            // Tooltip
+            // 4. Tooltip
             const tooltip = document.getElementById("tooltip");
             document.querySelectorAll("#muscle-map svg g").forEach(g => {
               g.addEventListener("mouseenter", () => {
@@ -78,9 +78,6 @@
               });
             });
           });
-      })
-      .catch(err => {
-        console.error("Ошибка получения мышц:", err);
       });
   </script>
 </body>
