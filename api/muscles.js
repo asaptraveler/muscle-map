@@ -1,13 +1,16 @@
-import axios from 'axios';
+const axios = require("axios");
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
+  const notionApiKey = process.env.NOTION_API_KEY;
+  const databaseId = process.env.NOTION_DB_ID;
+
   try {
-    const notionRes = await axios.post(
-      `https://api.notion.com/v1/databases/${process.env.NOTION_DB_ID}/query`,
+    const response = await axios.post(
+      `https://api.notion.com/v1/databases/${databaseId}/query`,
       {},
       {
         headers: {
-          Authorization: `Bearer ${process.env.NOTION_API_KEY}`,
+          Authorization: `Bearer ${notionApiKey}`,
           "Notion-Version": "2022-06-28",
           "Content-Type": "application/json"
         }
@@ -15,10 +18,11 @@ export default async function handler(req, res) {
     );
 
     const allMuscles = new Set();
-    notionRes.data.results.forEach(page => {
-      const prop = page.properties["Muscles"];
-      if (prop?.multi_select) {
-        prop.multi_select.forEach(tag => allMuscles.add(tag.name));
+
+    response.data.results.forEach(page => {
+      const muscleProp = page.properties["Muscles"];
+      if (muscleProp?.multi_select) {
+        muscleProp.multi_select.forEach(tag => allMuscles.add(tag.name));
       }
     });
 
@@ -26,8 +30,8 @@ export default async function handler(req, res) {
       primary: [...allMuscles],
       secondary: []
     });
-  } catch (err) {
-    console.error(err.response?.data || err.message);
-    res.status(500).send("Ошибка при подключении к Notion");
+  } catch (error) {
+    console.error("Ошибка запроса к Notion:", error.response?.data || error.message);
+    res.status(500).json({ error: "Ошибка запроса к Notion" });
   }
-}
+};
