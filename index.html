@@ -41,59 +41,43 @@
   <div id="tooltip"></div>
 
   <script>
-    // 👇 1. Связка: упражнения → мышцы
-    const exerciseMuscles = {
-      "Barbell squat": ["gluteus_medius", "mid_quad", "inner_quads", "outer_quads", "calves", "soleus"],
-      "Pull-up": ["biceps_brachii", "latissimus_dorsi", "brachioradialis"],
-      "Barbell bench press": ["pectoralis_major", "triceps_long_head", "deltoids_front"]
-    };
+    // Получаем активные мышцы с Node.js сервера
+    fetch("http://localhost:3000/muscles")
+      .then(res => res.json())
+      .then(activeMuscles => {
+        // Загружаем SVG
+        fetch("muscle-map.svg")
+          .then(res => res.text())
+          .then(svg => {
+            document.getElementById("muscle-map").innerHTML = svg;
 
-    // 👇 2. Вот как будто ты прочитал из Notion (можно потом подключить API)
-    const performedExercises = ["Barbell squat", "Pull-up", "Barbell bench press"];
+            // Подсветка мышц
+            activeMuscles.primary.forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.classList.add("primary");
+            });
+            activeMuscles.secondary.forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.classList.add("secondary");
+            });
 
-    // 👇 3. Собираем все мышцы, которые нужно подсветить
-    const activeMuscles = {
-      primary: [],
-      secondary: []
-    };
-
-    performedExercises.forEach(ex => {
-      const muscles = exerciseMuscles[ex];
-      if (muscles) activeMuscles.primary.push(...muscles);
-    });
-
-    // 👇 4. Загружаем SVG и подсвечиваем
-    fetch("muscle-map.svg")
-      .then(res => res.text())
-      .then(svg => {
-        document.getElementById("muscle-map").innerHTML = svg;
-
-        // Подсвечиваем мышцы
-        activeMuscles.primary.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.classList.add("primary");
-        });
-        activeMuscles.secondary.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.classList.add("secondary");
-        });
-
-        // Tooltip
-        const tooltip = document.getElementById("tooltip");
-        document.querySelectorAll("#muscle-map svg g").forEach(g => {
-          g.addEventListener("mouseenter", () => {
-            const name = g.id || "неизвестно";
-            tooltip.innerText = name;
-            tooltip.style.display = "block";
+            // Tooltip
+            const tooltip = document.getElementById("tooltip");
+            document.querySelectorAll("#muscle-map svg g").forEach(g => {
+              g.addEventListener("mouseenter", () => {
+                const name = g.id || "неизвестно";
+                tooltip.innerText = name;
+                tooltip.style.display = "block";
+              });
+              g.addEventListener("mousemove", (e) => {
+                tooltip.style.top = e.pageY + 10 + "px";
+                tooltip.style.left = e.pageX + 10 + "px";
+              });
+              g.addEventListener("mouseleave", () => {
+                tooltip.style.display = "none";
+              });
+            });
           });
-          g.addEventListener("mousemove", (e) => {
-            tooltip.style.top = e.pageY + 10 + "px";
-            tooltip.style.left = e.pageX + 10 + "px";
-          });
-          g.addEventListener("mouseleave", () => {
-            tooltip.style.display = "none";
-          });
-        });
       });
   </script>
 </body>
