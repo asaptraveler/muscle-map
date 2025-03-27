@@ -4,20 +4,39 @@
   <meta charset="UTF-8" />
   <title>Карта мышц</title>
   <style>
-  /* Скрываем все группы мышц */
-  #muscle-map svg g {
-    display: none;
-  }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: white;
+    }
 
-  /* Подсветка если понадобится позже */
-  .primary {
-    display: inline !important;
-  }
-  .secondary {
-    display: inline !important;
-    opacity: 0.6;
-  }
-</style>
+    svg {
+      width: 100%;
+      max-width: 800px;
+      height: auto;
+    }
+
+    .primary {
+      fill: #f44336 !important;
+      transition: fill 0.3s ease;
+    }
+
+    .secondary {
+      fill: orange !important;
+      transition: fill 0.3s ease;
+    }
+
+    #tooltip {
+      position: absolute;
+      display: none;
+      background: black;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
   <h1>🔥 Активные мышцы</h1>
@@ -25,48 +44,49 @@
   <div id="tooltip"></div>
 
   <script>
-    // 1. Получаем данные с серверной функции Vercel
-fetch("/api/muscles")
-  .then(res => res.json())
-  .then(activeMuscles => {
-    fetch("muscle-map.svg")
-      .then(res => res.text())
-      .then(svg => {
-        document.getElementById("muscle-map").innerHTML = svg;
+    fetch("/api/muscles")
+      .then(res => res.json())
+      .then(activeMuscles => {
+        fetch("muscle-map.svg")
+          .then(res => res.text())
+          .then(svg => {
+            document.getElementById("muscle-map").innerHTML = svg;
 
-        // Включаем мышцы из Notion
-        activeMuscles.primary.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.style.display = "inline";
-        });
+            // Включаем только активные мышцы
+            activeMuscles.primary.forEach(id => {
+              const el = document.getElementById(id);
+              if (el) {
+                el.style.display = "inline";
+                el.classList.add("primary");
+              }
+            });
 
-        activeMuscles.secondary.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) {
-            el.style.display = "inline";
-            el.style.opacity = "0.6";
-          }
-        });
+            activeMuscles.secondary.forEach(id => {
+              const el = document.getElementById(id);
+              if (el) {
+                el.style.display = "inline";
+                el.classList.add("secondary");
+              }
+            });
 
-        // Tooltip
-        const tooltip = document.getElementById("tooltip");
-        document.querySelectorAll("#muscle-map svg g").forEach(g => {
-          g.addEventListener("mouseenter", () => {
-            const name = g.id || "неизвестно";
-            tooltip.innerText = name;
-            tooltip.style.display = "block";
+            // Tooltip
+            const tooltip = document.getElementById("tooltip");
+            document.querySelectorAll("#muscle-map svg g").forEach(g => {
+              g.addEventListener("mouseenter", () => {
+                const name = g.id || "неизвестно";
+                tooltip.innerText = name;
+                tooltip.style.display = "block";
+              });
+              g.addEventListener("mousemove", (e) => {
+                tooltip.style.top = e.pageY + 10 + "px";
+                tooltip.style.left = e.pageX + 10 + "px";
+              });
+              g.addEventListener("mouseleave", () => {
+                tooltip.style.display = "none";
+              });
+            });
           });
-          g.addEventListener("mousemove", (e) => {
-            tooltip.style.top = e.pageY + 10 + "px";
-            tooltip.style.left = e.pageX + 10 + "px";
-          });
-          g.addEventListener("mouseleave", () => {
-            tooltip.style.display = "none";
-          });
-        });
       });
-  });
-
   </script>
 </body>
 </html>
