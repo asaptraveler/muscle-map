@@ -29,6 +29,8 @@ export default async function handler(req, res) {
       .map(t => t.plain_text || t.text?.content || "")
       .join("");
 
+    console.log("🔥 FULL RAW PAGE:", JSON.stringify(page.properties["Exercise"], null, 2));
+
     return {
       name: title || "Без названия",
       muscles: page.properties["Muscles"]?.multi_select?.map(m => m.name) || [],
