@@ -19,11 +19,14 @@ export default async function handler(req, res) {
 
   const data = await response.json();
 
-  // 👇 Временно логируем всё
-  console.log(JSON.stringify(data, null, 2));
+  // 🔍 Автоопределение названия колонки типа "title"
+  const firstPage = data.results[0];
+  const titleKey = Object.keys(firstPage.properties).find(
+    key => firstPage.properties[key].type === "title"
+  );
 
   const workouts = data.results.map(page => ({
-    name: page.properties["Exercise"]?.title?.[0]?.plain_text || "Без названия",
+    name: page.properties[titleKey]?.title?.[0]?.plain_text || "Без названия",
     muscles: page.properties["Muscles"]?.multi_select?.map(m => m.name) || [],
     date: page.properties["Date"]?.date?.start || "",
     sets: page.properties["Sets"]?.number || "",
