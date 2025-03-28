@@ -201,6 +201,7 @@
   ]).then(([activeMuscles, frontSVG, backSVG]) => {
     const container = document.getElementById("muscle-map");
     container.innerHTML = frontSVG + backSVG;
+    renderTableAndSVG(allData);
 
     const tooltip = document.getElementById("tooltip");
     document.querySelectorAll("#muscle-map svg g").forEach(g => {
