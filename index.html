@@ -59,24 +59,27 @@
 </head>
 <body>
   <nav>
-    <button onclick="switchTab('profile')">🧍 Profile</button>
-    <button onclick="switchTab('workout')">💪 Workout</button>
+    <button onclick="switchTab('dashboard')">🏋️ Главная</button>
+    <button onclick="switchTab('workout')">📊 Статистика</button>
     <button onclick="switchTab('gptcoach')">🤖 GPTCoach</button>
   </nav>
 
-  <div id="profile" class="section active">
+  <div id="dashboard" class="section active">
     <h1>🔥 Активные мышцы</h1>
     <div id="muscle-map"></div>
     <div id="tooltip"></div>
-  </div>
 
-  <div id="workout" class="section">
-    <h1>📋 Тренировки</h1>
+    <h2 style="margin-top: 40px;">📋 Тренировки</h2>
     <label>С:</label>
     <input type="date" id="date-start" />
     <label>По:</label>
     <input type="date" id="date-end" />
-    <div id="workout-table"></div>
+    <div id="workout-table" style="margin-top: 20px;"></div>
+  </div>
+
+  <div id="workout" class="section">
+    <h1>📈 Статистика (будет позже)</h1>
+    <p>Здесь появятся графики, прогресс и визуализация объёма тренировок.</p>
   </div>
 
   <div id="gptcoach" class="section">
