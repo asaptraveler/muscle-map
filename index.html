@@ -45,12 +45,6 @@
       fill: red;
     }
 
-    .secondary {
-      display: inline !important;
-      fill: orange;
-      opacity: 0.6;
-    }
-
     #tooltip {
       position: absolute;
       display: none;
@@ -89,11 +83,16 @@
   </div>
 
 <script>
+  function switchTab(tabId) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+  }
+
   let allData = [];
 
   function renderTableAndSVG(filteredData) {
     const tableDiv = document.getElementById("workout-table");
-    tableDiv.innerHTML = ""; // очищаем
+    tableDiv.innerHTML = "";
 
     const table = document.createElement("table");
     table.style.borderCollapse = "collapse";
@@ -133,25 +132,22 @@
     table.appendChild(tbody);
     tableDiv.appendChild(table);
 
-    // 🎯 Обновляем SVG на основе фильтра
     const activeMuscles = new Set();
-    filteredData.forEach(r => r.muscles.forEach(m => activeMuscles.add(m)));
-
-    document.querySelectorAll("#muscle-map .primary, #muscle-map .secondary").forEach(el => {
-      el.classList.remove("primary");
-      el.classList.remove("secondary");
+    const svgMuscles = new Set([...document.querySelectorAll("svg g[id]")].map(el => el.id));
+    filteredData.forEach(r => {
+      r.muscles.forEach(m => {
+        if (svgMuscles.has(m)) activeMuscles.add(m);
+      });
     });
+
+    document.querySelectorAll("#muscle-map .primary").forEach(el => el.classList.remove("primary"));
 
     fetch("/api/muscles")
       .then(res => res.json())
       .then(fullMuscleMap => {
-        fullMuscleMap.primary.forEach(id => {
+        (fullMuscleMap.primary || []).forEach(id => {
           const el = document.getElementById(id);
           if (el && activeMuscles.has(id)) el.classList.add("primary");
-        });
-        fullMuscleMap.secondary.forEach(id => {
-          const el = document.getElementById(id);
-          if (el && activeMuscles.has(id)) el.classList.add("secondary");
         });
       });
   }
@@ -159,11 +155,9 @@
   function applyFilters() {
     const dateFilter = document.getElementById("date-filter").value;
     let filtered = [...allData];
-
     if (dateFilter) {
       filtered = filtered.filter(row => row.date.startsWith(dateFilter));
     }
-
     renderTableAndSVG(filtered);
   }
 
@@ -175,21 +169,46 @@
 
       document.getElementById("date-filter").addEventListener("input", applyFilters);
 
-      // GPT анализ как было
       const text = data.map(r => `${r.date} — ${r.name} (${r.muscles.join(", ")}): ${r.sets}x${r.reps} @ ${r.weight}`).join("\n");
+
       fetch("/api/gpt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt: `Проанализируй мои тренировки:\n${text}\n\nКакие мышцы перегружены? Что улучшить? Дай рекомендации.` })
       })
-      .then(res => res.json())
-      .then(res => {
-        document.getElementById("gpt-response").innerText = res.reply || "Нет ответа.";
-      })
-      .catch(() => {
-        document.getElementById("gpt-response").innerText = "Ошибка при получении анализа от AI.";
+        .then(res => res.json())
+        .then(res => {
+          document.getElementById("gpt-response").innerText = res.reply || "Нет ответа.";
+        })
+        .catch(() => {
+          document.getElementById("gpt-response").innerText = "Ошибка при получении анализа от AI.";
+        });
+    });
+
+  // Загрузка SVG-карты мышц
+  Promise.all([
+    fetch("/api/muscles").then(res => res.json()),
+    fetch("muscle-map-front.svg").then(res => res.text()),
+    fetch("muscle-map-back.svg").then(res => res.text())
+  ]).then(([activeMuscles, frontSVG, backSVG]) => {
+    const container = document.getElementById("muscle-map");
+    container.innerHTML = frontSVG + backSVG;
+
+    const tooltip = document.getElementById("tooltip");
+    document.querySelectorAll("#muscle-map svg g").forEach(g => {
+      g.addEventListener("mouseenter", () => {
+        tooltip.innerText = g.id || "Неизвестно";
+        tooltip.style.display = "block";
+      });
+      g.addEventListener("mousemove", (e) => {
+        tooltip.style.top = e.pageY + 10 + "px";
+        tooltip.style.left = e.pageX + 10 + "px";
+      });
+      g.addEventListener("mouseleave", () => {
+        tooltip.style.display = "none";
       });
     });
+  });
 </script>
 </body>
 </html>
