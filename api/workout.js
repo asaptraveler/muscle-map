@@ -19,29 +19,30 @@ export default async function handler(req, res) {
 
   const data = await response.json();
 
-  // Автоопределение колонки типа title
-  const firstPage = data.results[0];
-  const titleKey = Object.keys(firstPage.properties).find(
-    key => firstPage.properties[key].type === "title"
-  );
+  const workouts = data.results.map(page => {
+    const properties = page.properties;
 
-const workouts = data.results.map(page => {
-  const title = (page.properties[titleKey]?.title || [])
-    .map(t => t.plain_text || t.text?.content || "")
-    .join("");
+    // 🧠 Автоопределение ключа title (заголовка)
+    const titleKey = Object.keys(properties).find(
+      key => properties[key].type === "title"
+    );
 
-  return {
-    name: title || "Без названия",
-    muscles: page.properties["Muscles"]?.multi_select?.map(m => m.name) || [],
-    date: page.properties["Date"]?.date?.start || "",
-    sets: page.properties["Sets"]?.number || "",
-    reps: page.properties["Reps"]?.number || "",
-    weight: page.properties["Weight"]?.rich_text?.[0]?.plain_text || ""
-  };
-});
+    const titleArray = properties[titleKey]?.title || [];
+    const title = titleArray.map(t => t.plain_text || t.text?.content || "").join("");
 
-// ✅ лог после завершения map
-console.log("💪 WORKOUTS RETURNED:", JSON.stringify(workouts, null, 2));
+    console.log("🔥 RAW PROPERTIES:", JSON.stringify(properties, null, 2));
+    console.log("🏷 TITLE EXTRACTED:", title);
 
-res.status(200).json(workouts);
+    return {
+      name: title || "Без названия",
+      muscles: properties["Muscles"]?.multi_select?.map(m => m.name) || [],
+      date: properties["Date"]?.date?.start || "",
+      sets: properties["Sets"]?.number || "",
+      reps: properties["Reps"]?.number || "",
+      weight: properties["Weight"]?.rich_text?.[0]?.plain_text || ""
+    };
+  });
+
+  console.log("💪 FINAL WORKOUTS:", JSON.stringify(workouts, null, 2));
+  res.status(200).json(workouts);
 }
