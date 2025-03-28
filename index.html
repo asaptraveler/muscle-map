@@ -88,111 +88,108 @@
     <div id="gpt-response">Загрузка...</div>
   </div>
 
-  <script>
-    function switchTab(tabId) {
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-    }
+<script>
+  let allData = [];
 
-    // SVG + мышцы
-    Promise.all([
-      fetch("/api/muscles").then(res => res.json()),
-      fetch("muscle-map-front.svg").then(res => res.text()),
-      fetch("muscle-map-back.svg").then(res => res.text())
-    ]).then(([activeMuscles, frontSVG, backSVG]) => {
-      const container = document.getElementById("muscle-map");
-      container.innerHTML = frontSVG + backSVG;
+  function renderTableAndSVG(filteredData) {
+    const tableDiv = document.getElementById("workout-table");
+    tableDiv.innerHTML = ""; // очищаем
 
-      const activate = (id, className) => {
-        const el = document.getElementById(id);
-        if (el) el.classList.add(className);
-      };
+    const table = document.createElement("table");
+    table.style.borderCollapse = "collapse";
+    table.style.width = "100%";
 
-      activeMuscles.primary.forEach(id => activate(id, "primary"));
-      activeMuscles.secondary.forEach(id => activate(id, "secondary"));
+    const headers = ["Exercise", "Muscles", "Date", "Sets", "Reps", "Weight"];
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    headers.forEach(text => {
+      const th = document.createElement("th");
+      th.textContent = text;
+      th.style.borderBottom = "2px solid #ccc";
+      th.style.textAlign = "left";
+      th.style.padding = "8px";
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
 
-      const tooltip = document.getElementById("tooltip");
-      document.querySelectorAll("#muscle-map svg g").forEach(g => {
-        g.addEventListener("mouseenter", () => {
-          tooltip.innerText = g.id || "Неизвестно";
-          tooltip.style.display = "block";
-        });
-        g.addEventListener("mousemove", (e) => {
-          tooltip.style.top = e.pageY + 10 + "px";
-          tooltip.style.left = e.pageX + 10 + "px";
-        });
-        g.addEventListener("mouseleave", () => {
-          tooltip.style.display = "none";
-        });
+    const tbody = document.createElement("tbody");
+    filteredData.forEach(row => {
+      const tr = document.createElement("tr");
+      headers.forEach(key => {
+        const td = document.createElement("td");
+        td.style.padding = "8px";
+        td.style.borderBottom = "1px solid #eee";
+
+        let value = row[key.toLowerCase()];
+        if (key === "Exercise") value = row.name;
+        if (Array.isArray(value)) td.textContent = value.join(", ");
+        else td.textContent = value || "";
+
+        tr.appendChild(td);
       });
+      tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
+    tableDiv.appendChild(table);
+
+    // 🎯 Обновляем SVG на основе фильтра
+    const activeMuscles = new Set();
+    filteredData.forEach(r => r.muscles.forEach(m => activeMuscles.add(m)));
+
+    document.querySelectorAll("#muscle-map .primary, #muscle-map .secondary").forEach(el => {
+      el.classList.remove("primary");
+      el.classList.remove("secondary");
     });
 
-    // Таблица тренировок
-    fetch("/api/workout")
+    fetch("/api/muscles")
       .then(res => res.json())
-      .then(data => {
-        const table = document.createElement("table");
-        table.style.borderCollapse = "collapse";
-        table.style.width = "100%";
-
-        const headers = ["Exercise", "Muscles", "Date", "Sets", "Reps", "Weight"];
-        const thead = document.createElement("thead");
-        const headerRow = document.createElement("tr");
-        headers.forEach(text => {
-          const th = document.createElement("th");
-          th.textContent = text;
-          th.style.borderBottom = "2px solid #ccc";
-          th.style.textAlign = "left";
-          th.style.padding = "8px";
-          headerRow.appendChild(th);
+      .then(fullMuscleMap => {
+        fullMuscleMap.primary.forEach(id => {
+          const el = document.getElementById(id);
+          if (el && activeMuscles.has(id)) el.classList.add("primary");
         });
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
-
-        const tbody = document.createElement("tbody");
-        data.forEach(row => {
-          const tr = document.createElement("tr");
-          headers.forEach(key => {
-            const td = document.createElement("td");
-            td.style.padding = "8px";
-            td.style.borderBottom = "1px solid #eee";
-            
-            let value = row[key.toLowerCase()];
-            if (key === "Exercise") value = row.name;
-
-            if (Array.isArray(value)) {
-              td.textContent = value.join(", ");
-            } else {
-              td.textContent = value || "";
-            }
-
-            tr.appendChild(td);
-          });
-          tbody.appendChild(tr);
-        });
-        table.appendChild(tbody);
-
-        document.getElementById("workout-table").appendChild(table);
-
-        // AI-запрос на основе данных
-        const text = data.map(r => `${r.date} — ${r.name} (${r.muscles.join(", ")}): ${r.sets}x${r.reps} @ ${r.weight}`).join("\n");
-
-        fetch("/api/gpt", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ prompt: `Проанализируй мои тренировки:
-${text}
-
-Какие мышцы перегружены? Что улучшить? Дай рекомендации.` })
-        })
-        .then(res => res.json())
-        .then(res => {
-          document.getElementById("gpt-response").innerText = res.reply || "Нет ответа.";
-        })
-        .catch(err => {
-          document.getElementById("gpt-response").innerText = "Ошибка при получении анализа от AI.";
+        fullMuscleMap.secondary.forEach(id => {
+          const el = document.getElementById(id);
+          if (el && activeMuscles.has(id)) el.classList.add("secondary");
         });
       });
-  </script>
+  }
+
+  function applyFilters() {
+    const dateFilter = document.getElementById("date-filter").value;
+    let filtered = [...allData];
+
+    if (dateFilter) {
+      filtered = filtered.filter(row => row.date.startsWith(dateFilter));
+    }
+
+    renderTableAndSVG(filtered);
+  }
+
+  fetch("/api/workout")
+    .then(res => res.json())
+    .then(data => {
+      allData = data;
+      renderTableAndSVG(allData);
+
+      document.getElementById("date-filter").addEventListener("input", applyFilters);
+
+      // GPT анализ как было
+      const text = data.map(r => `${r.date} — ${r.name} (${r.muscles.join(", ")}): ${r.sets}x${r.reps} @ ${r.weight}`).join("\n");
+      fetch("/api/gpt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: `Проанализируй мои тренировки:\n${text}\n\nКакие мышцы перегружены? Что улучшить? Дай рекомендации.` })
+      })
+      .then(res => res.json())
+      .then(res => {
+        document.getElementById("gpt-response").innerText = res.reply || "Нет ответа.";
+      })
+      .catch(() => {
+        document.getElementById("gpt-response").innerText = "Ошибка при получении анализа от AI.";
+      });
+    });
+</script>
 </body>
 </html>
