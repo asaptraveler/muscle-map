@@ -1,4 +1,4 @@
-// ✅ /api/workout.js — получает упражнения для таблицы "📋 Тренировки"
+// ✅ /api/workout.js — получает упражнения из таблицы Notion
 export default async function handler(req, res) {
   const NOTION_API_KEY = process.env.NOTION_API_KEY;
   const NOTION_DB_ID = process.env.NOTION_DB_ID;
@@ -21,12 +21,12 @@ export default async function handler(req, res) {
   const data = await response.json();
 
   const workouts = data.results.map(page => ({
-    name: page.properties["Exercise"]?.title?.[0]?.plain_text || "Без названия",
+    name: page.properties["Name"]?.title?.[0]?.plain_text || "Без названия",
     muscles: page.properties["Muscles"]?.multi_select?.map(m => m.name) || [],
     date: page.properties["Date"]?.date?.start || "",
     sets: page.properties["Sets"]?.number || "",
     reps: page.properties["Reps"]?.number || "",
-    weight: page.properties["Weight"]?.rich_text?.[0]?.plain_text || ""
+    weight: page.properties["Weight"]?.number || ""
   }));
 
   res.status(200).json(workouts);
