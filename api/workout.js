@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   const NOTION_API_KEY = process.env.NOTION_API_KEY;
-  const NOTION_DB_ID = process.env.NOTION_WORKOUT_DB_ID;
+  const NOTION_DB_ID = process.env.NOTION_DB_ID;
 
   const response = await fetch(`https://api.notion.com/v1/databases/${NOTION_DB_ID}/query`, {
     method: "POST",
