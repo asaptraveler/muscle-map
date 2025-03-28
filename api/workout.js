@@ -19,6 +19,7 @@ export default async function handler(req, res) {
 
   const data = await response.json();
 
+  // Автоопределение колонки типа title
   const firstPage = data.results[0];
   const titleKey = Object.keys(firstPage.properties).find(
     key => firstPage.properties[key].type === "title"
@@ -28,8 +29,6 @@ export default async function handler(req, res) {
     const title = (page.properties[titleKey]?.title || [])
       .map(t => t.plain_text || t.text?.content || "")
       .join("");
-
-    console.log("🔥 FULL RAW PAGE:", JSON.stringify(page.properties["Exercise"], null, 2));
 
     return {
       name: title || "Без названия",
