@@ -25,20 +25,23 @@ export default async function handler(req, res) {
     key => firstPage.properties[key].type === "title"
   );
 
-  const workouts = data.results.map(page => {
-    const title = (page.properties[titleKey]?.title || [])
-      .map(t => t.plain_text || t.text?.content || "")
-      .join("");
+const workouts = data.results.map(page => {
+  const title = (page.properties[titleKey]?.title || [])
+    .map(t => t.plain_text || t.text?.content || "")
+    .join("");
 
-    return {
-      name: title || "Без названия",
-      muscles: page.properties["Muscles"]?.multi_select?.map(m => m.name) || [],
-      date: page.properties["Date"]?.date?.start || "",
-      sets: page.properties["Sets"]?.number || "",
-      reps: page.properties["Reps"]?.number || "",
-      weight: page.properties["Weight"]?.rich_text?.[0]?.plain_text || ""
-    };
-  });
+  return {
+    name: title || "Без названия",
+    muscles: page.properties["Muscles"]?.multi_select?.map(m => m.name) || [],
+    date: page.properties["Date"]?.date?.start || "",
+    sets: page.properties["Sets"]?.number || "",
+    reps: page.properties["Reps"]?.number || "",
+    weight: page.properties["Weight"]?.rich_text?.[0]?.plain_text || ""
+  };
+});
 
-  res.status(200).json(workouts);
+// ✅ лог после завершения map
+console.log("💪 WORKOUTS RETURNED:", JSON.stringify(workouts, null, 2));
+
+res.status(200).json(workouts);
 }
