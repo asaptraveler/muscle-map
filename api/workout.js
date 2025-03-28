@@ -19,20 +19,25 @@ export default async function handler(req, res) {
 
   const data = await response.json();
 
-  // 🔍 Автоопределение названия колонки типа "title"
   const firstPage = data.results[0];
   const titleKey = Object.keys(firstPage.properties).find(
     key => firstPage.properties[key].type === "title"
   );
 
-  const workouts = data.results.map(page => ({
-    name: page.properties[titleKey]?.title?.[0]?.plain_text || "Без названия",
-    muscles: page.properties["Muscles"]?.multi_select?.map(m => m.name) || [],
-    date: page.properties["Date"]?.date?.start || "",
-    sets: page.properties["Sets"]?.number || "",
-    reps: page.properties["Reps"]?.number || "",
-    weight: page.properties["Weight"]?.rich_text?.[0]?.plain_text || ""
-  }));
+  const workouts = data.results.map(page => {
+    const title = (page.properties[titleKey]?.title || [])
+      .map(t => t.plain_text || t.text?.content || "")
+      .join("");
+
+    return {
+      name: title || "Без названия",
+      muscles: page.properties["Muscles"]?.multi_select?.map(m => m.name) || [],
+      date: page.properties["Date"]?.date?.start || "",
+      sets: page.properties["Sets"]?.number || "",
+      reps: page.properties["Reps"]?.number || "",
+      weight: page.properties["Weight"]?.rich_text?.[0]?.plain_text || ""
+    };
+  });
 
   res.status(200).json(workouts);
 }
