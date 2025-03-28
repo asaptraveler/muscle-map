@@ -4,19 +4,22 @@
   <meta charset="UTF-8" />
   <title>Карта мышц</title>
   <style>
-   /* Скрыть только мышцы, но не весь скелет */
-  .muscle {
-    display: none;
-  }
+    /* По умолчанию все мышцы скрыты */
+#muscle-map svg g.muscle {
+  display: none;
+}
 
-  .primary {
-    display: inline !important;
-  }
+/* Активные подсветки */
+.primary {
+  display: inline !important;
+  fill: red;
+}
 
-  .secondary {
-    display: inline !important;
-    opacity: 0.6;
-  }
+.secondary {
+  display: inline !important;
+  fill: orange;
+  opacity: 0.6;
+}
 </style>
 </head>
 <body>
@@ -26,42 +29,26 @@
 
   <script>
     fetch("/api/muscles")
-      .then(res => res.json())
-      .then(activeMuscles => {
-        fetch("muscle-map.svg")
-          .then(res => res.text())
-          .then(svg => {
-            document.getElementById("muscle-map").innerHTML = svg;
+  .then(res => res.json())
+  .then(activeMuscles => {
+    fetch("muscle-map.svg")
+      .then(res => res.text())
+      .then(svg => {
+        document.getElementById("muscle-map").innerHTML = svg;
 
-            // Включаем активные мышцы
-            activeMuscles.primary.forEach(id => {
-              const el = document.getElementById(id);
-              if (el) el.classList.add("primary");
-            });
+        // Активируем primary
+        activeMuscles.primary.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.classList.add("primary");
+        });
 
-            activeMuscles.secondary.forEach(id => {
-              const el = document.getElementById(id);
-              if (el) el.classList.add("secondary");
-            });
-
-            // Tooltip по наведению
-            const tooltip = document.getElementById("tooltip");
-            document.querySelectorAll("#muscle-map svg g").forEach(g => {
-              g.addEventListener("mouseenter", () => {
-                const name = g.id || "неизвестно";
-                tooltip.innerText = name;
-                tooltip.style.display = "block";
-              });
-              g.addEventListener("mousemove", (e) => {
-                tooltip.style.top = e.pageY + 10 + "px";
-                tooltip.style.left = e.pageX + 10 + "px";
-              });
-              g.addEventListener("mouseleave", () => {
-                tooltip.style.display = "none";
-              });
-            });
-          });
+        // Активируем secondary
+        activeMuscles.secondary.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.classList.add("secondary");
+        });
       });
+  });
   </script>
 </body>
 </html>
