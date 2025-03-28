@@ -19,13 +19,16 @@ export default async function handler(req, res) {
 
   const data = await response.json();
 
+  // 👇 Временно логируем всё
+  console.log(JSON.stringify(data, null, 2));
+
   const workouts = data.results.map(page => ({
-    name: page.properties["Name"]?.title?.[0]?.plain_text || "Без названия",
+    name: page.properties["Exercise"]?.title?.[0]?.plain_text || "Без названия",
     muscles: page.properties["Muscles"]?.multi_select?.map(m => m.name) || [],
     date: page.properties["Date"]?.date?.start || "",
     sets: page.properties["Sets"]?.number || "",
     reps: page.properties["Reps"]?.number || "",
-    weight: page.properties["Weight"]?.number || ""
+    weight: page.properties["Weight"]?.rich_text?.[0]?.plain_text || ""
   }));
 
   res.status(200).json(workouts);
