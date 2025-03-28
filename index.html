@@ -36,6 +36,7 @@
       display: block;
     }
 
+    /* SVG мышцы */
     #muscle-map svg g.muscle {
       display: none;
     }
@@ -70,20 +71,19 @@
     <button onclick="switchTab('workout')">💪 Workout</button>
   </nav>
 
-  <!-- 🔹 Секция: Профиль -->
+  <!-- 🔹 Секции -->
   <div id="profile" class="section active">
     <h1>🔥 Активные мышцы</h1>
     <div id="muscle-map"></div>
     <div id="tooltip"></div>
   </div>
 
-  <!-- 🔹 Секция: Тренировки -->
   <div id="workout" class="section">
     <h1>📋 Тренировки</h1>
     <div id="workout-table"></div>
   </div>
 
-  <!-- 🔹 Скрипт -->
+  <!-- 🔹 Скрипты -->
   <script>
     function switchTab(tabId) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -107,7 +107,6 @@
       activeMuscles.primary.forEach(id => activate(id, "primary"));
       activeMuscles.secondary.forEach(id => activate(id, "secondary"));
 
-      // Tooltip
       const tooltip = document.getElementById("tooltip");
       document.querySelectorAll("#muscle-map svg g").forEach(g => {
         g.addEventListener("mouseenter", () => {
