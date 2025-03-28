@@ -36,7 +36,6 @@
       display: block;
     }
 
-    /* SVG мышцы */
     #muscle-map svg g.muscle {
       display: none;
     }
@@ -62,55 +61,31 @@
       font-size: 12px;
       pointer-events: none;
     }
-
-    #coach-response {
-      background: #f4f4f4;
-      padding: 16px;
-      border-radius: 10px;
-      white-space: pre-wrap;
-      margin-top: 20px;
-    }
-
-    button#get-analysis {
-      margin-top: 10px;
-      padding: 10px 16px;
-      background: black;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
-  <!-- 🔹 Навигация -->
   <nav>
     <button onclick="switchTab('profile')">🧍 Profile</button>
     <button onclick="switchTab('workout')">💪 Workout</button>
-    <button onclick="switchTab('coach')">🧠 GPTCoach</button>
+    <button onclick="switchTab('gptcoach')">🤖 GPTCoach</button>
   </nav>
 
-  <!-- 🔹 Profile -->
   <div id="profile" class="section active">
     <h1>🔥 Активные мышцы</h1>
     <div id="muscle-map"></div>
     <div id="tooltip"></div>
   </div>
 
-  <!-- 🔹 Workout -->
   <div id="workout" class="section">
     <h1>📋 Тренировки</h1>
     <div id="workout-table"></div>
   </div>
 
-  <!-- 🔹 GPTCoach -->
-  <div id="coach" class="section">
-    <h1>🧠 GPT-Фитнес Коуч</h1>
-    <button id="get-analysis">Получить анализ</button>
-    <div id="coach-response"></div>
+  <div id="gptcoach" class="section">
+    <h1>🤖 Анализ от AI</h1>
+    <div id="gpt-response">Загрузка...</div>
   </div>
 
-  <!-- 🔹 Скрипт -->
   <script>
     function switchTab(tabId) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -189,28 +164,26 @@
         table.appendChild(tbody);
 
         document.getElementById("workout-table").appendChild(table);
-      });
 
-    // Получение анализа от GPTCoach
-    document.getElementById("get-analysis").addEventListener("click", () => {
-      const btn = document.getElementById("get-analysis");
-      const result = document.getElementById("coach-response");
-      btn.disabled = true;
-      btn.textContent = "Анализируется...";
+        // AI-запрос на основе данных
+        const text = data.map(r => `${r.date} — ${r.name} (${r.muscles.join(", ")}): ${r.sets}x${r.reps} @ ${r.weight}`).join("\n");
 
-      fetch("/api/coach")
+        fetch("/api/gpt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: `Проанализируй мои тренировки:
+${text}
+
+Какие мышцы перегружены? Что улучшить? Дай рекомендации.` })
+        })
         .then(res => res.json())
-        .then(data => {
-          result.innerText = data.advice || "Нет ответа 😢";
+        .then(res => {
+          document.getElementById("gpt-response").innerText = res.reply || "Нет ответа.";
         })
-        .catch(() => {
-          result.innerText = "Ошибка получения анализа.";
-        })
-        .finally(() => {
-          btn.disabled = false;
-          btn.textContent = "Получить анализ";
+        .catch(err => {
+          document.getElementById("gpt-response").innerText = "Ошибка при получении анализа от AI.";
         });
-    });
+      });
   </script>
 </body>
 </html>
