@@ -4,51 +4,90 @@
   <meta charset="UTF-8" />
   <title>Карта мышц</title>
   <style>
+    body {
+      font-family: sans-serif;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    #muscle-container {
+      display: flex;
+      gap: 40px;
+      align-items: center;
+    }
+
     /* По умолчанию все мышцы скрыты */
-#muscle-map svg g.muscle {
-  display: none;
-}
+    #muscle-map svg g.muscle {
+      display: none;
+    }
 
-/* Активные подсветки */
-.primary {
-  display: inline !important;
-  fill: red;
-}
+    /* Подсветка активных мышц */
+    .primary {
+      display: inline !important;
+      fill: red;
+    }
 
-.secondary {
-  display: inline !important;
-  fill: orange;
-  opacity: 0.6;
-}
-</style>
+    .secondary {
+      display: inline !important;
+      fill: orange;
+      opacity: 0.6;
+    }
+
+    #tooltip {
+      position: absolute;
+      display: none;
+      background: #000;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+    }
+  </style>
 </head>
 <body>
   <h1>🔥 Активные мышцы</h1>
-  <div id="muscle-map"></div>
+  <div id="muscle-container">
+    <div id="muscle-map"></div>
+  </div>
   <div id="tooltip"></div>
 
   <script>
-    fetch("/api/muscles")
-  .then(res => res.json())
-  .then(activeMuscles => {
-    fetch("muscle-map.svg")
-      .then(res => res.text())
-      .then(svg => {
-        document.getElementById("muscle-map").innerHTML = svg;
+    Promise.all([
+      fetch("/api/muscles").then(res => res.json()),
+      fetch("muscle-map-front.svg").then(res => res.text()),
+      fetch("muscle-map-back.svg").then(res => res.text())
+    ]).then(([activeMuscles, frontSVG, backSVG]) => {
+      const container = document.getElementById("muscle-map");
+      container.innerHTML = frontSVG + backSVG;
 
-        // Активируем primary
-        activeMuscles.primary.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.classList.add("primary");
+      const activate = (id, className) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add(className);
+      };
+
+      activeMuscles.primary.forEach(id => activate(id, "primary"));
+      activeMuscles.secondary.forEach(id => activate(id, "secondary"));
+
+      // Tooltip (опционально)
+      const tooltip = document.getElementById("tooltip");
+      document.querySelectorAll("#muscle-map svg g").forEach(g => {
+        g.addEventListener("mouseenter", () => {
+          tooltip.innerText = g.id || "Неизвестно";
+          tooltip.style.display = "block";
         });
-
-        // Активируем secondary
-        activeMuscles.secondary.forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.classList.add("secondary");
+        g.addEventListener("mousemove", (e) => {
+          tooltip.style.top = e.pageY + 10 + "px";
+          tooltip.style.left = e.pageX + 10 + "px";
+        });
+        g.addEventListener("mouseleave", () => {
+          tooltip.style.display = "none";
         });
       });
-  });
+    });
   </script>
 </body>
 </html>
