@@ -62,6 +62,24 @@
       font-size: 12px;
       pointer-events: none;
     }
+
+    #coach-response {
+      background: #f4f4f4;
+      padding: 16px;
+      border-radius: 10px;
+      white-space: pre-wrap;
+      margin-top: 20px;
+    }
+
+    button#get-analysis {
+      margin-top: 10px;
+      padding: 10px 16px;
+      background: black;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -69,28 +87,37 @@
   <nav>
     <button onclick="switchTab('profile')">🧍 Profile</button>
     <button onclick="switchTab('workout')">💪 Workout</button>
+    <button onclick="switchTab('coach')">🧠 GPTCoach</button>
   </nav>
 
-  <!-- 🔹 Секции -->
+  <!-- 🔹 Profile -->
   <div id="profile" class="section active">
     <h1>🔥 Активные мышцы</h1>
     <div id="muscle-map"></div>
     <div id="tooltip"></div>
   </div>
 
+  <!-- 🔹 Workout -->
   <div id="workout" class="section">
     <h1>📋 Тренировки</h1>
     <div id="workout-table"></div>
   </div>
 
-  <!-- 🔹 Скрипты -->
+  <!-- 🔹 GPTCoach -->
+  <div id="coach" class="section">
+    <h1>🧠 GPT-Фитнес Коуч</h1>
+    <button id="get-analysis">Получить анализ</button>
+    <div id="coach-response"></div>
+  </div>
+
+  <!-- 🔹 Скрипт -->
   <script>
     function switchTab(tabId) {
       document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
       document.getElementById(tabId).classList.add('active');
     }
 
-    // Загрузка SVG и активация мышц
+    // SVG + мышцы
     Promise.all([
       fetch("/api/muscles").then(res => res.json()),
       fetch("muscle-map-front.svg").then(res => res.text()),
@@ -122,46 +149,68 @@
         });
       });
     });
-// 👇 Workout table из Notion
-fetch("/api/workout")
-  .then(res => res.json())
-  .then(data => {
-    const table = document.createElement("table");
-    table.style.borderCollapse = "collapse";
-    table.style.width = "100%";
 
-    const headers = ["Exercise", "Muscles", "Date", "Sets", "Reps", "Weight"];
-    const thead = document.createElement("thead");
-    const headerRow = document.createElement("tr");
-    headers.forEach(text => {
-      const th = document.createElement("th");
-      th.textContent = text;
-      th.style.borderBottom = "2px solid #ccc";
-      th.style.textAlign = "left";
-      th.style.padding = "8px";
-      headerRow.appendChild(th);
-    });
-    thead.appendChild(headerRow);
-    table.appendChild(thead);
+    // Таблица тренировок
+    fetch("/api/workout")
+      .then(res => res.json())
+      .then(data => {
+        const table = document.createElement("table");
+        table.style.borderCollapse = "collapse";
+        table.style.width = "100%";
 
-    const tbody = document.createElement("tbody");
-    data.forEach(row => {
-      const tr = document.createElement("tr");
-      headers.forEach(key => {
-        const td = document.createElement("td");
-        td.style.padding = "8px";
-        td.style.borderBottom = "1px solid #eee";
-        td.textContent = Array.isArray(row[key.toLowerCase()])
-          ? row[key.toLowerCase()].join(", ")
-          : row[key.toLowerCase()];
-        tr.appendChild(td);
+        const headers = ["Exercise", "Muscles", "Date", "Sets", "Reps", "Weight"];
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+        headers.forEach(text => {
+          const th = document.createElement("th");
+          th.textContent = text;
+          th.style.borderBottom = "2px solid #ccc";
+          th.style.textAlign = "left";
+          th.style.padding = "8px";
+          headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
+        data.forEach(row => {
+          const tr = document.createElement("tr");
+          headers.forEach(key => {
+            const td = document.createElement("td");
+            td.style.padding = "8px";
+            td.style.borderBottom = "1px solid #eee";
+            td.textContent = Array.isArray(row[key.toLowerCase()])
+              ? row[key.toLowerCase()].join(", ")
+              : row[key.toLowerCase()];
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+
+        document.getElementById("workout-table").appendChild(table);
       });
-      tbody.appendChild(tr);
-    });
-    table.appendChild(tbody);
 
-    document.getElementById("workout-table").appendChild(table);
-  });
+    // Получение анализа от GPTCoach
+    document.getElementById("get-analysis").addEventListener("click", () => {
+      const btn = document.getElementById("get-analysis");
+      const result = document.getElementById("coach-response");
+      btn.disabled = true;
+      btn.textContent = "Анализируется...";
+
+      fetch("/api/coach")
+        .then(res => res.json())
+        .then(data => {
+          result.innerText = data.advice || "Нет ответа 😢";
+        })
+        .catch(() => {
+          result.innerText = "Ошибка получения анализа.";
+        })
+        .finally(() => {
+          btn.disabled = false;
+          btn.textContent = "Получить анализ";
+        });
+    });
   </script>
 </body>
 </html>
