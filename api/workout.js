@@ -1,4 +1,3 @@
-// ✅ /api/workout.js — получает упражнения из таблицы Notion
 export default async function handler(req, res) {
   const NOTION_API_KEY = process.env.NOTION_API_KEY;
   const NOTION_DB_ID = process.env.NOTION_DB_ID;
