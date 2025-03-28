@@ -2,29 +2,44 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Карта мышц</title>
+  <title>Фитнес ассистент</title>
   <style>
     body {
       font-family: sans-serif;
+      margin: 0;
+      padding: 0;
     }
 
-    h1 {
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-
-    #muscle-container {
+    nav {
       display: flex;
-      gap: 40px;
-      align-items: center;
+      background: #111;
+      color: white;
+      padding: 10px;
+      justify-content: center;
+      gap: 20px;
     }
 
-    /* По умолчанию все мышцы скрыты */
+    nav button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .section {
+      display: none;
+      padding: 20px;
+    }
+
+    .active {
+      display: block;
+    }
+
     #muscle-map svg g.muscle {
       display: none;
     }
 
-    /* Подсветка активных мышц */
     .primary {
       display: inline !important;
       fill: red;
@@ -49,13 +64,33 @@
   </style>
 </head>
 <body>
-  <h1>🔥 Активные мышцы</h1>
-  <div id="muscle-container">
-    <div id="muscle-map"></div>
-  </div>
-  <div id="tooltip"></div>
+  <!-- 🔹 Навигация -->
+  <nav>
+    <button onclick="switchTab('profile')">🧍 Profile</button>
+    <button onclick="switchTab('workout')">💪 Workout</button>
+  </nav>
 
+  <!-- 🔹 Секция: Профиль -->
+  <div id="profile" class="section active">
+    <h1>🔥 Активные мышцы</h1>
+    <div id="muscle-map"></div>
+    <div id="tooltip"></div>
+  </div>
+
+  <!-- 🔹 Секция: Тренировки -->
+  <div id="workout" class="section">
+    <h1>📋 Тренировки</h1>
+    <div id="workout-table"></div>
+  </div>
+
+  <!-- 🔹 Скрипт -->
   <script>
+    function switchTab(tabId) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    // Загрузка SVG и активация мышц
     Promise.all([
       fetch("/api/muscles").then(res => res.json()),
       fetch("muscle-map-front.svg").then(res => res.text()),
@@ -72,7 +107,7 @@
       activeMuscles.primary.forEach(id => activate(id, "primary"));
       activeMuscles.secondary.forEach(id => activate(id, "secondary"));
 
-      // Tooltip (опционально)
+      // Tooltip
       const tooltip = document.getElementById("tooltip");
       document.querySelectorAll("#muscle-map svg g").forEach(g => {
         g.addEventListener("mouseenter", () => {
