@@ -154,9 +154,16 @@
             const td = document.createElement("td");
             td.style.padding = "8px";
             td.style.borderBottom = "1px solid #eee";
-            td.textContent = Array.isArray(row[key.toLowerCase()])
-              ? row[key.toLowerCase()].join(", ")
-              : row[key.toLowerCase()];
+            
+            let value = row[key.toLowerCase()];
+            if (key === "Exercise") value = row.name;
+
+            if (Array.isArray(value)) {
+              td.textContent = value.join(", ");
+            } else {
+              td.textContent = value || "";
+            }
+
             tr.appendChild(td);
           });
           tbody.appendChild(tr);
