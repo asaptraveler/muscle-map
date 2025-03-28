@@ -1,18 +1,22 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <title>Фитнес ассистент</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      margin: 0;
-      padding: 0;
-    }
+< !DOCTYPE html >
+	<
+	html lang = "ru" >
+	<
+	head >
+	<
+	meta charset = "UTF-8" / >
+	<
+	title > Фитнес ассистент < /title> <
+	style >
+	body {
+		font - family: sans - serif;
+		margin: 0;
+		padding: 0;
+	}
 
-    nav {
-      display: flex;
-      background: #111;
+nav {
+	display: flex;
+	background: #111;
       color: white;
       padding: 10px;
       justify-content: center;
@@ -36,181 +40,207 @@
       display: block;
     }
 
-    #muscle-map svg g.muscle {
-      display: none;
-    }
+    # muscle - map svg g.muscle {
+			display: none;
+		}
 
-    .primary {
-      display: inline !important;
-      fill: red;
-    }
+		.primary {
+			display: inline!important;
+			fill: red;
+		}
 
-    #tooltip {
-      position: absolute;
-      display: none;
-      background: #000;
-      color: #fff;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      pointer-events: none;
-    }
-  </style>
-</head>
-<body>
-  <nav>
-    <button onclick="switchTab('profile')">🧍 Profile</button>
-    <button onclick="switchTab('workout')">💪 Workout</button>
-    <button onclick="switchTab('gptcoach')">🤖 GPTCoach</button>
-  </nav>
+	#tooltip {
+		position: absolute;
+		display: none;
+		background: #000;
+      color: # fff;
+		padding: 4 px 8 px;
+		border - radius: 4 px;
+		font - size: 12 px;
+		pointer - events: none;
+	} <
+	/style> <
+	/head> <
+	body >
+	<
+	nav >
+	<
+	button onclick = "switchTab('profile')" > 🧍Profile < /button> <
+	button onclick = "switchTab('workout')" > 💪Workout < /button> <
+	button onclick = "switchTab('gptcoach')" > 🤖GPTCoach < /button> <
+	/nav>
 
-  <div id="profile" class="section active">
-    <h1>🔥 Активные мышцы</h1>
-    <div id="muscle-map"></div>
-    <div id="tooltip"></div>
-  </div>
+	<
+	div id = "profile"
+	class = "section active" >
+	<
+	h1 > 🔥Активные мышцы < /h1> <
+	div id = "muscle-map" > < /div> <
+	div id = "tooltip" > < /div> <
+	/div>
 
-  <div id="workout" class="section">
-    <h1>📋 Тренировки</h1>
-    <label>С:</label>
-    <input type="date" id="date-start" />
-    <label>По:</label>
-    <input type="date" id="date-end" />
-    <div id="workout-table"></div>
-  </div>
+	<
+	div id = "workout"
+	class = "section" >
+	<
+	h1 > 📋Тренировки < /h1> <
+	label > С: < /label> <
+		input type = "date"
+	id = "date-start" / >
+	<
+	label > По: < /label> <
+		input type = "date"
+	id = "date-end" / >
+	<
+	div id = "workout-table" > < /div> <
+	/div>
 
-  <div id="gptcoach" class="section">
-    <h1>🤖 Анализ от AI</h1>
-    <div id="gpt-response">Загрузка...</div>
-  </div>
+	<
+	div id = "gptcoach"
+	class = "section" >
+	<
+	h1 > 🤖Анализ от AI < /h1> <
+	div id = "gpt-response" > Загрузка... < /div> <
+	/div>
 
-<script>
-  function switchTab(tabId) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-  }
+	<
+	script >
+	function switchTab(tabId) {
+		document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+		document.getElementById(tabId).classList.add('active');
+	}
 
-  let allData = [];
+	let allData = [];
 
-  function renderTableAndSVG(filteredData) {
-    const tableDiv = document.getElementById("workout-table");
-    tableDiv.innerHTML = "";
+	function renderTableAndSVG(filteredData) {
+		const tableDiv = document.getElementById("workout-table");
+		tableDiv.innerHTML = "";
 
-    const table = document.createElement("table");
-    table.style.borderCollapse = "collapse";
-    table.style.width = "100%";
+		const table = document.createElement("table");
+		table.style.borderCollapse = "collapse";
+		table.style.width = "100%";
 
-    const headers = ["Exercise", "Muscles", "Date", "Sets", "Reps", "Weight"];
-    const thead = document.createElement("thead");
-    const headerRow = document.createElement("tr");
-    headers.forEach(text => {
-      const th = document.createElement("th");
-      th.textContent = text;
-      th.style.borderBottom = "2px solid #ccc";
-      th.style.textAlign = "left";
-      th.style.padding = "8px";
-      headerRow.appendChild(th);
-    });
-    thead.appendChild(headerRow);
-    table.appendChild(thead);
+		const headers = ["Exercise", "Muscles", "Date", "Sets", "Reps", "Weight"];
+		const thead = document.createElement("thead");
+		const headerRow = document.createElement("tr");
+		headers.forEach(text => {
+			const th = document.createElement("th");
+			th.textContent = text;
+			th.style.borderBottom = "2px solid #ccc";
+			th.style.textAlign = "left";
+			th.style.padding = "8px";
+			headerRow.appendChild(th);
+		});
+		thead.appendChild(headerRow);
+		table.appendChild(thead);
 
-    const tbody = document.createElement("tbody");
-    filteredData.forEach(row => {
-      const tr = document.createElement("tr");
-      headers.forEach(key => {
-        const td = document.createElement("td");
-        td.style.padding = "8px";
-        td.style.borderBottom = "1px solid #eee";
+		const tbody = document.createElement("tbody");
+		filteredData.forEach(row => {
+			const tr = document.createElement("tr");
+			headers.forEach(key => {
+				const td = document.createElement("td");
+				td.style.padding = "8px";
+				td.style.borderBottom = "1px solid #eee";
 
-        let value = row[key.toLowerCase()];
-        if (key === "Exercise") value = row.name;
-        if (Array.isArray(value)) td.textContent = value.join(", ");
-        else td.textContent = value || "";
+				let value = row[key.toLowerCase()];
+				if (key === "Exercise") value = row.name;
+				if (Array.isArray(value)) td.textContent = value.join(", ");
+				else td.textContent = value || "";
 
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
-    });
-    table.appendChild(tbody);
-    tableDiv.appendChild(table);
+				tr.appendChild(td);
+			});
+			tbody.appendChild(tr);
+		});
+		table.appendChild(tbody);
+		tableDiv.appendChild(table);
 
-    const activeMuscles = new Set();
-    const svgMuscles = new Set([...document.querySelectorAll("svg g[id]")].map(el => el.id));
-    filteredData.forEach(r => {
-      r.muscles.forEach(m => {
-        if (svgMuscles.has(m)) activeMuscles.add(m);
-      });
-    });
+		const activeMuscles = new Set();
+		const svgMuscles = new Set([...document.querySelectorAll("svg g[id]")].map(el => el.id));
+		filteredData.forEach(r => {
+			r.muscles.forEach(m => {
+				if (svgMuscles.has(m)) activeMuscles.add(m);
+			});
+		});
 
-    document.querySelectorAll("#muscle-map .primary").forEach(el => el.classList.remove("primary"));
+		document.querySelectorAll("#muscle-map .primary").forEach(el => el.classList.remove("primary"));
 
-    fetch("/api/muscles")
-      .then(res => res.json())
-      .then(fullMuscleMap => {
-        (fullMuscleMap.primary || []).forEach(id => {
-          const el = document.getElementById(id);
-          if (el && activeMuscles.has(id)) el.classList.add("primary");
-        });
-      });
-  }
+		fetch("/api/muscles")
+			.then(res => res.json())
+			.then(fullMuscleMap => {
+				(fullMuscleMap.primary || []).forEach(id => {
+					const el = document.getElementById(id);
+					if (el && activeMuscles.has(id)) el.classList.add("primary");
+				});
+			});
+	}
 
-  function applyFilters() {
-    const dateFilter = document.getElementById("date-filter").value;
-    let filtered = [...allData];
-    if (dateFilter) {
-      filtered = filtered.filter(row => row.date.startsWith(dateFilter));
-    }
-    renderTableAndSVG(filtered);
-  }
+	function applyFilters() {
+		const startDate = document.getElementById("date-start").value;
+		const endDate = document.getElementById("date-end").value;
+		let filtered = [...allData];
 
-  fetch("/api/workout")
-    .then(res => res.json())
-    .then(data => {
-      allData = data;
-      renderTableAndSVG(allData);
+		if (startDate) {
+			filtered = filtered.filter(row => row.date >= startDate);
+		}
+		if (endDate) {
+			filtered = filtered.filter(row => row.date <= endDate);
+		}
 
-      document.getElementById("date-filter").addEventListener("input", applyFilters);
+		renderTableAndSVG(filtered);
+	}
 
-      const text = data.map(r => `${r.date} — ${r.name} (${r.muscles.join(", ")}): ${r.sets}x${r.reps} @ ${r.weight}`).join("\n");
+	fetch("/api/workout")
+	.then(res => res.json())
+	.then(data => {
+		allData = data;
+		renderTableAndSVG(allData);
 
-      fetch("/api/gpt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: `Проанализируй мои тренировки:\n${text}\n\nКакие мышцы перегружены? Что улучшить? Дай рекомендации.` })
-      })
-        .then(res => res.json())
-        .then(res => {
-          document.getElementById("gpt-response").innerText = res.reply || "Нет ответа.";
-        })
-        .catch(() => {
-          document.getElementById("gpt-response").innerText = "Ошибка при получении анализа от AI.";
-        });
-    });
+		document.getElementById("date-filter").addEventListener("input", applyFilters);
 
-  // Загрузка SVG-карты мышц
-  Promise.all([
-    fetch("/api/muscles").then(res => res.json()),
-    fetch("muscle-map-front.svg").then(res => res.text()),
-    fetch("muscle-map-back.svg").then(res => res.text())
-  ]).then(([activeMuscles, frontSVG, backSVG]) => {
-    const container = document.getElementById("muscle-map");
-    container.innerHTML = frontSVG + backSVG;
+		const text = data.map(r => `${r.date} — ${r.name} (${r.muscles.join(", ")}): ${r.sets}x${r.reps} @ ${r.weight}`).join("\n");
 
-    const tooltip = document.getElementById("tooltip");
-    document.querySelectorAll("#muscle-map svg g").forEach(g => {
-      g.addEventListener("mouseenter", () => {
-        tooltip.innerText = g.id || "Неизвестно";
-        tooltip.style.display = "block";
-      });
-      g.addEventListener("mousemove", (e) => {
-        tooltip.style.top = e.pageY + 10 + "px";
-        tooltip.style.left = e.pageX + 10 + "px";
-      });
-      g.addEventListener("mouseleave", () => {
-        tooltip.style.display = "none";
-      });
-    });
-  });
-</script>
-</body>
-</html>
+		fetch("/api/gpt", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({
+					prompt: `Проанализируй мои тренировки:\n${text}\n\nКакие мышцы перегружены? Что улучшить? Дай рекомендации.`
+				})
+			})
+			.then(res => res.json())
+			.then(res => {
+				document.getElementById("gpt-response").innerText = res.reply || "Нет ответа.";
+			})
+			.catch(() => {
+				document.getElementById("gpt-response").innerText = "Ошибка при получении анализа от AI.";
+			});
+	});
+
+	// Загрузка SVG-карты мышц
+	Promise.all([
+		fetch("/api/muscles").then(res => res.json()),
+		fetch("muscle-map-front.svg").then(res => res.text()),
+		fetch("muscle-map-back.svg").then(res => res.text())
+	]).then(([activeMuscles, frontSVG, backSVG]) => {
+		const container = document.getElementById("muscle-map");
+		container.innerHTML = frontSVG + backSVG;
+
+		const tooltip = document.getElementById("tooltip");
+		document.querySelectorAll("#muscle-map svg g").forEach(g => {
+			g.addEventListener("mouseenter", () => {
+				tooltip.innerText = g.id || "Неизвестно";
+				tooltip.style.display = "block";
+			});
+			g.addEventListener("mousemove", (e) => {
+				tooltip.style.top = e.pageY + 10 + "px";
+				tooltip.style.left = e.pageX + 10 + "px";
+			});
+			g.addEventListener("mouseleave", () => {
+				tooltip.style.display = "none";
+			});
+		});
+	}); <
+	/script> <
+	/body> <
+	/html>
