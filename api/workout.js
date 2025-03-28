@@ -1,9 +1,10 @@
+// /api/workout.js
+
 export default async function handler(req, res) {
   const NOTION_API_KEY = process.env.NOTION_API_KEY;
-  const NOTION_WORKOUT_DB_ID = process.env.NOTION_WORKOUT_DB_ID;
+  const NOTION_DB_ID = process.env.NOTION_DB_ID;
 
-  // Запрос к Notion API
-  const response = await fetch(`https://api.notion.com/v1/databases/${NOTION_WORKOUT_DB_ID}/query`, {
+  const response = await fetch(`https://api.notion.com/v1/databases/${NOTION_DB_ID}/query`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${NOTION_API_KEY}`,
@@ -13,14 +14,12 @@ export default async function handler(req, res) {
     body: JSON.stringify({})
   });
 
-  // Обработка ошибок
   if (!response.ok) {
     const error = await response.text();
-    console.error("❌ Ошибка запроса к Notion:", error);
+    console.error("Ошибка запроса к Notion:", error);
     return res.status(500).json({ error: "Ошибка при получении данных из Notion" });
   }
 
-  // Обработка ответа
   const data = await response.json();
 
   const workouts = data.results.map(page => ({
@@ -29,7 +28,9 @@ export default async function handler(req, res) {
     date: page.properties["Date"]?.date?.start || "",
     sets: page.properties["Sets"]?.number || "",
     reps: page.properties["Reps"]?.number || "",
-    weight: page.properties["Weight"]?.rich_text?.[0]?.plain_text || ""
+    weight: page.properties["Weight"]?.number
+         ?? page.properties["Weight"]?.rich_text?.[0]?.plain_text
+         ?? ""
   }));
 
   res.status(200).json(workouts);
