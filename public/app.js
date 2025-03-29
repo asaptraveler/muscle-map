@@ -1,4 +1,4 @@
-let allData = []; // 👈 обязательно добавить
+var allData = []; // 👈 заменить let на var
 
 function switchTab(tabId) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
