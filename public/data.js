@@ -7,5 +7,4 @@ const exerciseDatabase = {
   "Push-ups": ["pecs", "triceps"]
 };
 
-let allData = [];
 let currentDisplayCount = 10;
