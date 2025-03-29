@@ -1,4 +1,4 @@
-var allData = []; // 👈 заменить let на var
+// allData будет глобальной — без повторного объявления
 
 function switchTab(tabId) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
