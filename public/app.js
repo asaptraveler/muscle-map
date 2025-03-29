@@ -1,9 +1,10 @@
+let allData = []; // 👈 обязательно добавить
+
 function switchTab(tabId) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.getElementById(tabId).classList.add('active');
 }
 
-// Заполнить выпадающий список упражнений
 const exerciseSelect = document.getElementById("exercise-select");
 for (let name in exerciseDatabase) {
   const opt = document.createElement("option");
@@ -12,10 +13,8 @@ for (let name in exerciseDatabase) {
   exerciseSelect.appendChild(opt);
 }
 
-// Установить дату по умолчанию — сегодня
 document.getElementById("new-date").valueAsDate = new Date();
 
-// Добавление новой тренировки
 function addWorkoutEntry() {
   const name = document.getElementById("exercise-select").value;
   const date = document.getElementById("new-date").value;
@@ -40,9 +39,10 @@ fetch("muscle-map-front.svg")
     applyFilters(); // подсветить активные мышцы
   });
 
+// 👇 Загрузить тренировки из Notion API
 fetch("/api/workout")
   .then(res => res.json())
   .then(data => {
     allData = data;
-    applyFilters();
+    applyFilters(); // применить фильтры
   });
