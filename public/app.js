@@ -31,13 +31,14 @@ function addWorkoutEntry() {
   switchTab("dashboard");
 }
 
-// 👇 Загрузить SVG-карту тела из файла
-fetch("muscle-map-front.svg")
-  .then(res => res.text())
-  .then(svg => {
-    document.getElementById("muscle-map").innerHTML = svg;
-    applyFilters(); // подсветить активные мышцы
-  });
+// Загрузить SVG-карту тела (фронт + спина)
+Promise.all([
+  fetch("muscle-map-front.svg").then(res => res.text()),
+  fetch("muscle-map-back.svg").then(res => res.text())
+]).then(([frontSVG, backSVG]) => {
+  document.getElementById("muscle-map").innerHTML = frontSVG + backSVG;
+  applyFilters(); // подсветить активные мышцы
+});
 
 // 👇 Загрузить тренировки из Notion API
 fetch("/api/workout")
