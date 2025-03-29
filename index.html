@@ -55,6 +55,10 @@
       font-size: 12px;
       pointer-events: none;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -74,7 +78,10 @@
     <input type="date" id="date-start" />
     <label>По:</label>
     <input type="date" id="date-end" />
+    <label><input type="checkbox" id="limit-7days" checked /> Только за последние 7 дней</label>
+    <button onclick="resetFilters()">Сбросить</button>
     <div id="workout-table" style="margin-top: 20px;"></div>
+    <button id="load-more-btn">Показать ещё</button>
   </div>
 
   <div id="workout" class="section">
@@ -94,6 +101,7 @@
   }
 
   let allData = [];
+  let currentDisplayCount = 10;
 
   function renderTableAndSVG(filteredData) {
     const tableDiv = document.getElementById("workout-table");
@@ -118,7 +126,7 @@
     table.appendChild(thead);
 
     const tbody = document.createElement("tbody");
-    filteredData.forEach(row => {
+    filteredData.slice(0, currentDisplayCount).forEach(row => {
       const tr = document.createElement("tr");
       headers.forEach(key => {
         const td = document.createElement("td");
@@ -155,12 +163,28 @@
           if (el && activeMuscles.has(id)) el.classList.add("primary");
         });
       });
+
+    const loadMoreBtn = document.getElementById("load-more-btn");
+    if (filteredData.length > currentDisplayCount) {
+      loadMoreBtn.classList.remove("hidden");
+    } else {
+      loadMoreBtn.classList.add("hidden");
+    }
   }
 
   function applyFilters() {
     const startDate = document.getElementById("date-start").value;
     const endDate = document.getElementById("date-end").value;
+    const limit7 = document.getElementById("limit-7days").checked;
     let filtered = [...allData];
+
+    if (limit7) {
+      const today = new Date();
+      const pastDate = new Date(today);
+      pastDate.setDate(today.getDate() - 7);
+      const weekAgo = pastDate.toISOString().split("T")[0];
+      filtered = filtered.filter(row => row.date >= weekAgo);
+    }
 
     if (startDate) {
       filtered = filtered.filter(row => row.date >= startDate);
@@ -172,14 +196,28 @@
     renderTableAndSVG(filtered);
   }
 
+  function resetFilters() {
+    document.getElementById("date-start").value = "";
+    document.getElementById("date-end").value = "";
+    document.getElementById("limit-7days").checked = true;
+    currentDisplayCount = 10;
+    applyFilters();
+  }
+
+  document.getElementById("load-more-btn").addEventListener("click", () => {
+    currentDisplayCount += 10;
+    applyFilters();
+  });
+
   fetch("/api/workout")
     .then(res => res.json())
     .then(data => {
       allData = data;
-      renderTableAndSVG(allData);
+      applyFilters();
 
       document.getElementById("date-start").addEventListener("input", applyFilters);
       document.getElementById("date-end").addEventListener("input", applyFilters);
+      document.getElementById("limit-7days").addEventListener("change", applyFilters);
 
       const text = data.map(r => `${r.date} — ${r.name} (${r.muscles.join(", ")}): ${r.sets}x${r.reps} @ ${r.weight}`).join("\n");
 
@@ -204,7 +242,7 @@
   ]).then(([activeMuscles, frontSVG, backSVG]) => {
     const container = document.getElementById("muscle-map");
     container.innerHTML = frontSVG + backSVG;
-    renderTableAndSVG(allData);
+    applyFilters();
 
     const tooltip = document.getElementById("tooltip");
     document.querySelectorAll("#muscle-map svg g").forEach(g => {
