@@ -39,3 +39,10 @@ fetch("muscle-map-front.svg")
     document.getElementById("muscle-map").innerHTML = svg;
     applyFilters(); // подсветить активные мышцы
   });
+
+fetch("/api/workout")
+  .then(res => res.json())
+  .then(data => {
+    allData = data;
+    applyFilters();
+  });
